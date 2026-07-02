@@ -1,44 +1,10 @@
 {
-  "app": "Peerix Talk",
-  "actions": {
-    "share": "Share",
-    "leave": "Leave",
-    "microphone": {
-      "on": "Unmute microphone",
-      "off": "Mute microphone",
-      "toggle": "Toggle microphone",
-      "options": "Microphone options"
-    },
-    "camera": {
-      "on": "Turn camera on",
-      "off": "Turn camera off",
-      "toggle": "Toggle camera",
-      "options": "Camera options"
-    },
-    "screen": {
-      "on": "Stop screen sharing",
-      "off": "Share screen"
-    },
-    "chat": {
-      "on": "Close chat",
-      "off": "Open chat"
-    },
-    "settings": "Settings"
+  "common": {
+    "appName": "Peerix Talk",
+    "defaultUserName": "Guest"
   },
   "join": {
-    "readyTitle": "Ready when you are.",
-    "joiningRoom": "You'll join {{roomName}}",
-    "roomName": "Sapphire Velvet",
-    "peerToPeer": "Peer-to-peer",
-    "nothingStored": "nothing stored",
-    "rtcDomain": "rtc.io",
-    "optionalPassword": "Optional password",
-    "passwordPlaceholder": "Leave blank for an open room",
-    "passwordHint": "Set on first join. Lives in the URL hash (#p=), so it isn't sent in HTTP requests — share the full link with people you want to let in.",
-    "yourNameLabel": "Your name",
-    "guestName": "Guest",
-    "connectingCamera": "Connecting camera…",
-    "joinNow": "Join now",
-    "copyInviteLink": "Copy invite link"
+    "yourName": "Your name",
+    "joinRoom": "Join room"
   }
 }
