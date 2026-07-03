@@ -16,6 +16,14 @@
     "copy": "Link kopieren",
     "copied": "Kopiert!"
   },
+  "chat": {
+    "title": "Chat",
+    "close": "Chat schließen",
+    "empty": "Noch keine Nachrichten",
+    "placeholder": "Nachricht eingeben…",
+    "send": "Senden",
+    "author": "Sie"
+  },
   "mediaButton": {
     "noInputDevices": "Keine Eingabegeräte gefunden"
   }

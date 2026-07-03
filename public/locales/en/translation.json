@@ -16,6 +16,14 @@
     "copy": "Copy link",
     "copied": "Copied!"
   },
+  "chat": {
+    "title": "Chat",
+    "close": "Close chat",
+    "empty": "No messages yet",
+    "placeholder": "Type a message...",
+    "send": "Send",
+    "author": "You"
+  },
   "mediaButton": {
     "noInputDevices": "No input devices found"
   }

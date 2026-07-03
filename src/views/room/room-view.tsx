@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { MediaButton } from "@/components/media-button";
 // import { VideoGrid } from "@/views/room/video-grid";
-// import { ChatPanel } from "@/views/room/chat-panel";
+import { ChatPanel } from "@/views/room/chat-panel";
 import { ShareDialog } from "@/views/share-dialog";
 
 function formatDuration(s: number): string {
@@ -94,8 +94,9 @@ export function RoomView({ onLeave }: { onLeave: () => void }) {
       </header>
 
       <main className="flex flex-1 gap-4 overflow-hidden p-4">
-        {/*<VideoGrid asideOpen={chatOpen} />
-        {chatOpen && <ChatPanel onClose={() => setChatOpen(false)} />}*/}
+        {/*<VideoGrid asideOpen={chatOpen} />*/}
+        <div className="flex-1"></div>
+        {chatOpen && <ChatPanel onClose={() => setChatOpen(false)} />}
       </main>
 
       <ShareDialog open={shareOpen} onOpenChange={setShareOpen} />
