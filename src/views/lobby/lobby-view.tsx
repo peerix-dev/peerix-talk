@@ -26,20 +26,22 @@ export function LobbyView({ onJoin }: { onJoin: () => void }) {
           <div className="text-xs font-bold font-mono truncate">#{roomId}</div>
         </div>
         <div className="grow" />
-        <MediaButton
-          kind="audio"
-          enabled={mic}
-          deviceId=""
-          onToggle={() => setMic(!mic)}
-          onDeviceChange={() => {}}
-        />
-        <MediaButton
-          kind="video"
-          enabled={cam}
-          deviceId=""
-          onToggle={() => setCam(!cam)}
-          onDeviceChange={() => {}}
-        />
+        <div className="flex gap-2">
+          <MediaButton
+            kind="audio"
+            enabled={mic}
+            deviceId=""
+            onToggle={() => setMic(!mic)}
+            onDeviceChange={() => {}}
+          />
+          <MediaButton
+            kind="video"
+            enabled={cam}
+            deviceId=""
+            onToggle={() => setCam(!cam)}
+            onDeviceChange={() => {}}
+          />
+        </div>
       </header>
 
       <form
