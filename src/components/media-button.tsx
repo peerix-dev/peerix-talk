@@ -254,7 +254,7 @@ export function MediaButton({
             ))}
             {devices.length === 0 && (
               <DropdownMenuRadioItem disabled value="">
-                {t("actions.noInputDevices")}
+                {t("mediaButton.noInputDevices")}
               </DropdownMenuRadioItem>
             )}
           </DropdownMenuRadioGroup>

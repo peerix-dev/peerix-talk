@@ -3,8 +3,20 @@
     "appName": "Peerix Talk",
     "defaultUserName": "Guest"
   },
-  "join": {
+  "lobby": {
     "yourName": "Your name",
     "joinRoom": "Join room"
+  },
+  "share": {
+    "title": "Invite link",
+    "description": "Share this link to invite others to the conference",
+    "qrAlt": "QR code for invite link",
+    "generating": "Generating QR code...",
+    "inviteLink": "Invite link",
+    "copy": "Copy link",
+    "copied": "Copied!"
+  },
+  "mediaButton": {
+    "noInputDevices": "No input devices found"
   }
 }

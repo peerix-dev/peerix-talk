@@ -1,0 +1,22 @@
+{
+  "common": {
+    "appName": "Peerix Talk",
+    "defaultUserName": "Gast"
+  },
+  "lobby": {
+    "yourName": "Ihr Name",
+    "joinRoom": "Raum betreten"
+  },
+  "share": {
+    "title": "Einladungslink",
+    "description": "Teilen Sie diesen Link, um andere zur Konferenz einzuladen",
+    "qrAlt": "QR-Code für den Einladungslink",
+    "generating": "QR-Code wird generiert…",
+    "inviteLink": "Einladungslink",
+    "copy": "Link kopieren",
+    "copied": "Kopiert!"
+  },
+  "mediaButton": {
+    "noInputDevices": "Keine Eingabegeräte gefunden"
+  }
+}
