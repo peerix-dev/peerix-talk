@@ -26,5 +26,12 @@
   },
   "mediaButton": {
     "noInputDevices": "Keine Eingabegeräte gefunden"
+  },
+  "room": {
+    "label": "Weitere Aktionen",
+    "screenShare": "Bildschirm teilen",
+    "chat": "Chat",
+    "shareRoom": "Raum teilen",
+    "leave": "Raum verlassen"
   }
 }

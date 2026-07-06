@@ -26,5 +26,12 @@
   },
   "mediaButton": {
     "noInputDevices": "No input devices found"
+  },
+  "room": {
+    "label": "More actions",
+    "screenShare": "Share screen",
+    "chat": "Chat",
+    "shareRoom": "Share room",
+    "leave": "Leave room"
   }
 }
