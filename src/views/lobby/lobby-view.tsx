@@ -8,13 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Separator } from "@/components/ui/separator";
 import { MediaButton } from "@/components/media-button";
+import { useStorage } from "@/hooks/use-storage";
 
 export function LobbyView({ onJoin }: { onJoin: () => void }) {
   const { t } = useTranslation();
   const { roomId } = getRoomId();
+  const { value: name, setValue: setName } = useStorage("username");
   const [mic, setMic] = useState(false);
   const [cam, setCam] = useState(false);
-  const [name, setName] = useState("");
 
   return (
     <div className="flex h-max w-96 flex-col overflow-auto rounded bg-background shadow">
