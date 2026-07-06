@@ -19,15 +19,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useStorage } from "@/hooks/use-storage";
 
 type MediaKind = "audio" | "video";
 
 interface MediaButtonProps {
   kind: MediaKind;
   enabled: boolean;
-  deviceId: string;
   onToggle: () => void;
-  onDeviceChange: (deviceId: string) => void;
 }
 
 export interface MediaDevice {
@@ -78,13 +77,12 @@ function startAudioAnalysis(
 
   const bufferLength = analyser.frequencyBinCount;
   const dataArray = new Uint8Array(bufferLength);
+  const binsPerBar = Math.floor(bufferLength / barCount);
 
   function updateLevels() {
     analyser.getByteFrequencyData(dataArray);
 
-    // Map frequency bins to bars, averaging nearby bins
     const newLevels: number[] = [];
-    const binsPerBar = Math.floor(bufferLength / barCount);
     for (let i = 0; i < barCount; i++) {
       let sum = 0;
       for (let j = 0; j < binsPerBar; j++) {
@@ -99,42 +97,38 @@ function startAudioAnalysis(
   updateLevels();
 
   return () => {
+    clearTimeout(timer);
     if (audioContext) {
-      clearTimeout(timer);
       audioContext.close();
       audioContext = null;
-      onUpdate(Array(barCount).fill(0));
     }
+    onUpdate(Array(barCount).fill(0));
   };
 }
 
-export function MediaButton({
-  kind,
-  enabled,
-  deviceId,
-  onToggle,
-  onDeviceChange,
-}: MediaButtonProps) {
+export function MediaButton({ kind, enabled, onToggle }: MediaButtonProps) {
+  const storageKey = `${kind}DeviceId`;
+  const { value: storedDeviceId, setValue: setStoredDeviceId } =
+    useStorage(storageKey);
+
   const icon = ICON_MAP[kind][enabled ? "on" : "off"];
   const { t } = useTranslation();
   const [devices, setDevices] = useState<MediaDevice[]>([]);
   const [audioLevels, setAudioLevels] = useState(Array(BAR_COUNT).fill(0));
-  const [currentDeviceId, setCurrentDeviceId] = useState<string>(deviceId);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const streamRef = useRef<MediaStream>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const disposeAudioRef = useRef<() => void>(null);
   const [videoReady, setVideoReady] = useState(false);
 
   const startMediaProcessing = async (deviceId: string) => {
-    setVideoReady(false);
     const stream = await navigator.mediaDevices.getUserMedia({
       [kind]: deviceId ? { deviceId: { exact: deviceId } } : true,
     });
     streamRef.current = stream;
     const foundDevices = await enumerateDevices(kind);
     setDevices(foundDevices);
-    if (foundDevices.length && !currentDeviceId) {
-      setCurrentDeviceId(foundDevices[0].deviceId);
+    if (foundDevices.length && !deviceId) {
+      setStoredDeviceId(foundDevices[0].deviceId);
     }
     if (kind === "video") {
       setVideoReady(false);
@@ -156,31 +150,24 @@ export function MediaButton({
     if (videoRef.current?.srcObject) {
       videoRef.current.srcObject = null;
     }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-    }
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
     disposeAudioRef.current?.();
   };
 
   const handleOpenChange = async (open: boolean) => {
-    if (open) startMediaProcessing(currentDeviceId);
-    else {
-      stopMediaProcessing();
-      onDeviceChange(currentDeviceId);
-    }
+    if (open) startMediaProcessing(storedDeviceId);
+    else stopMediaProcessing();
   };
 
   const handleDeviceChange = (deviceId: string) => {
-    setCurrentDeviceId(deviceId);
+    setStoredDeviceId(deviceId);
     stopMediaProcessing();
     startMediaProcessing(deviceId);
   };
 
-  // Clean up
   useEffect(() => {
-    return () => {
-      stopMediaProcessing();
-    };
+    return stopMediaProcessing;
   }, []);
 
   return (
@@ -240,7 +227,7 @@ export function MediaButton({
         )}
         <DropdownMenuGroup>
           <DropdownMenuRadioGroup
-            value={currentDeviceId}
+            value={storedDeviceId}
             onValueChange={handleDeviceChange}
           >
             {devices.map((device) => (

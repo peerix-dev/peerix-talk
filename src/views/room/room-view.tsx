@@ -66,16 +66,12 @@ export function RoomView({ onLeave }: { onLeave: () => void }) {
           <MediaButton
             kind="audio"
             enabled={mic}
-            deviceId=""
             onToggle={() => setMic(!mic)}
-            onDeviceChange={() => {}}
           />
           <MediaButton
             kind="video"
             enabled={cam}
-            deviceId=""
             onToggle={() => setCam(!cam)}
-            onDeviceChange={() => {}}
           />
           {/* Desktop: show buttons inline */}
           <div className="hidden gap-2 sm:flex">

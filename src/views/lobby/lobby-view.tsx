@@ -31,16 +31,12 @@ export function LobbyView({ onJoin }: { onJoin: () => void }) {
           <MediaButton
             kind="audio"
             enabled={mic}
-            deviceId=""
             onToggle={() => setMic(!mic)}
-            onDeviceChange={() => {}}
           />
           <MediaButton
             kind="video"
             enabled={cam}
-            deviceId=""
             onToggle={() => setCam(!cam)}
-            onDeviceChange={() => {}}
           />
         </div>
       </header>
