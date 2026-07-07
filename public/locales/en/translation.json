@@ -25,7 +25,13 @@
     "author": "You"
   },
   "mediaButton": {
-    "noInputDevices": "No input devices found"
+    "noInputDevices": "No input devices found",
+    "audioToggleOn": "Turn off microphone",
+    "audioToggleOff": "Turn on microphone",
+    "videoToggleOn": "Turn off camera",
+    "videoToggleOff": "Turn on camera",
+    "audioDevices": "Select microphone",
+    "videoDevices": "Select camera"
   },
   "room": {
     "label": "More actions",

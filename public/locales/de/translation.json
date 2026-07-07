@@ -25,7 +25,13 @@
     "author": "Sie"
   },
   "mediaButton": {
-    "noInputDevices": "Keine Eingabegeräte gefunden"
+    "noInputDevices": "Keine Eingabegeräte gefunden",
+    "audioToggleOn": "Mikrofon ausschalten",
+    "audioToggleOff": "Mikrofon einschalten",
+    "videoToggleOn": "Kamera ausschalten",
+    "videoToggleOff": "Kamera einschalten",
+    "audioDevices": "Mikrofon auswählen",
+    "videoDevices": "Kamera auswählen"
   },
   "room": {
     "label": "Weitere Aktionen",

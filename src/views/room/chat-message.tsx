@@ -27,7 +27,7 @@ export function ChatMessage(options: {
         </div>
       </ItemHeader>
       <ItemContent>
-        <ItemDescription className="text-sm text-muted-foreground">
+        <ItemDescription className="text-sm text-muted-foreground break-all line-clamp-none">
           {text}
         </ItemDescription>
       </ItemContent>

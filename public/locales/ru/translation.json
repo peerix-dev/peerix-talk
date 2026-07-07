@@ -25,7 +25,13 @@
     "author": "Вы"
   },
   "mediaButton": {
-    "noInputDevices": "Устройства ввода не найдены"
+    "noInputDevices": "Устройства ввода не найдены",
+    "audioToggleOn": "Выключить микрофон",
+    "audioToggleOff": "Включить микрофон",
+    "videoToggleOn": "Выключить камеру",
+    "videoToggleOff": "Включить камеру",
+    "audioDevices": "Выбрать микрофон",
+    "videoDevices": "Выбрать камеру"
   },
   "room": {
     "label": "Действия",

@@ -176,12 +176,29 @@ export function MediaButton({ kind, enabled, onToggle }: MediaButtonProps) {
         <Button
           size="lg"
           variant={enabled ? "outline" : "destructive"}
-          onClick={onToggle}
+          onClick={() => onToggle()}
+          aria-label={t(
+            kind === "audio"
+              ? enabled
+                ? "mediaButton.audioToggleOn"
+                : "mediaButton.audioToggleOff"
+              : enabled
+                ? "mediaButton.videoToggleOn"
+                : "mediaButton.videoToggleOff",
+          )}
         >
           <HugeiconsIcon icon={icon} />
         </Button>
         <DropdownMenuTrigger asChild>
-          <Button size="icon-lg" variant={enabled ? "outline" : "destructive"}>
+          <Button
+            size="icon-lg"
+            variant={enabled ? "outline" : "destructive"}
+            aria-label={t(
+              kind === "audio"
+                ? "mediaButton.audioDevices"
+                : "mediaButton.videoDevices",
+            )}
+          >
             <HugeiconsIcon icon={ChevronDown} />
           </Button>
         </DropdownMenuTrigger>
