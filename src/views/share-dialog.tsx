@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import QRCode from "qrcode";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Copy01Icon, CopyCheckIcon } from "@hugeicons/core-free-icons";
-import { getRoomId } from "@/lib/room-id";
+import { inviteLink } from "@/lib/room-info";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
@@ -24,7 +24,6 @@ export function ShareDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const { t } = useTranslation();
-  const { inviteLink } = getRoomId();
   const [qrSrc, setQrSrc] = useState("");
   const [copied, setCopied] = useState(false);
 

@@ -8,7 +8,7 @@ import {
   Share01Icon,
   MoreVerticalIcon,
 } from "@hugeicons/core-free-icons";
-import { getRoomId } from "@/lib/room-id";
+import { roomId } from "@/lib/room-info";
 import { isMobile } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -35,7 +35,6 @@ function formatDuration(s: number): string {
 
 export function RoomView({ onLeave }: { onLeave: () => void }) {
   const { t } = useTranslation();
-  const { roomId } = getRoomId();
   const [chatOpen, setChatOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [mic, setMic] = useState(false);

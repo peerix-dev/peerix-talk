@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
-import { getRoomId } from "@/lib/room-id";
+import { roomId } from "@/lib/room-info";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -12,7 +12,6 @@ import { useStorage } from "@/hooks/use-storage";
 
 export function LobbyView({ onJoin }: { onJoin: () => void }) {
   const { t } = useTranslation();
-  const { roomId } = getRoomId();
   const { value: name, setValue: setName } = useStorage("username");
   const [mic, setMic] = useState(false);
   const [cam, setCam] = useState(false);
