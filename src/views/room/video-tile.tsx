@@ -1,21 +1,24 @@
-import { forwardRef, useRef, useState } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import { toSvg } from "jdenticon";
+import type { Participant } from "@/hooks/use-room";
 import { cn } from "@/lib/utils";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { MicOff02Icon } from "@hugeicons/core-free-icons";
 
-export interface VideoTileProps {
-  id?: string;
-  name?: string;
-  audio: boolean;
-  video: boolean;
-  speaking: boolean;
-}
-
-export const VideoTile = forwardRef<HTMLDivElement, VideoTileProps>(
-  function VideoTile({ name, audio, video, speaking }, ref) {
+export const VideoTile = forwardRef<HTMLDivElement, Participant>(
+  function VideoTile(
+    { peer, name, audio, video, mirror, muted, speaking, stream },
+    ref,
+  ) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [loading, setLoading] = useState(video);
+
+    useEffect(() => {
+      const el = videoRef.current;
+      if (!el || !stream) return;
+      el.srcObject = stream;
+      el.play().catch(() => {});
+    }, [audio, video, stream]);
 
     return (
       <div
@@ -28,7 +31,11 @@ export const VideoTile = forwardRef<HTMLDivElement, VideoTileProps>(
         {video && (
           <video
             ref={videoRef}
-            className="h-full w-full object-cover"
+            className={cn(
+              "h-full w-full object-cover",
+              mirror && "rotate-y-180",
+            )}
+            muted={muted ?? false}
             onPlaying={() => setLoading(false)}
             onLoadedData={() => setLoading(false)}
           />
@@ -47,7 +54,7 @@ export const VideoTile = forwardRef<HTMLDivElement, VideoTileProps>(
         {!loading && !video && (
           <div
             className="absolute inset-0 flex items-center justify-center [&>svg]:max-h-[50%] [&>svg]:max-w-[50%]"
-            dangerouslySetInnerHTML={{ __html: toSvg(name, 64) }}
+            dangerouslySetInnerHTML={{ __html: toSvg(peer || name, 64) }}
           />
         )}
 

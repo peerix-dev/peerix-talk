@@ -27,9 +27,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { ChatMessage } from "@/views/room/chat-message";
 
-type ChatPanelProps = { className?: string; onClose?: () => void };
-
-export function ChatPanel({ className = "", onClose }: ChatPanelProps) {
+export function ChatPanel({
+  className = "",
+  onClose,
+}: {
+  className?: string;
+  onClose?: () => void;
+}) {
   const { t } = useTranslation();
   const { messages, setMessages } = useRoom();
   const [isOpening, setIsOpening] = useState(false);

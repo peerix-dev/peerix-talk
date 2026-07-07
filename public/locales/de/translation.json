@@ -38,6 +38,7 @@
     "screenShare": "Bildschirm teilen",
     "chat": "Chat",
     "shareRoom": "Raum teilen",
-    "leave": "Raum verlassen"
+    "leave": "Raum verlassen",
+    "empty": "Warte auf Teilnehmer…"
   }
 }

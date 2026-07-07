@@ -55,7 +55,6 @@ index.html        # main HTML template
 - **TypeScript strict mode**: enabled in `tsconfig.app.json`.
 - **Named exports preferred**: use `export function` / `export const`. Avoid `export default` in new files.
 - **Use `@/` alias imports**: always import via `@/...`, never relative paths.
-- **Relative project paths**: when locating or opening files within this project, use paths relative to the project root (e.g., `src/**/*`, `node_modules/**/*`, `public/**/*`).
 - **Hugeicons reference**: to browse available Hugeicon names, check `node_modules/@hugeicons/core-free-icons/dist/esm/*.js`.
 - **i18n keys are nested**: use dot notation: `t("room.microphone.on")`, `t("lobby.joinRoom")`, etc.
 - **Async/await preferred**: avoid raw `.then()` chains.

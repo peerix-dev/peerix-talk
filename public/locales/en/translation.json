@@ -36,8 +36,9 @@
   "room": {
     "label": "More actions",
     "screenShare": "Share screen",
-    "chat": "Chat",
+    "chat": "Toggle chat",
     "shareRoom": "Share room",
-    "leave": "Leave room"
+    "leave": "Leave room",
+    "empty": "Waiting for participants…"
   }
 }

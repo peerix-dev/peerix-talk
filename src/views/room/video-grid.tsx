@@ -1,18 +1,15 @@
 import { useLayoutEffect, useEffect, useRef, useState } from "react";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
-import { VideoTile, type VideoTileProps } from "@/views/room/video-tile";
-
-const PARTICIPANTS: VideoTileProps[] = [
-  { id: "1", name: "Alice", audio: false, video: false, speaking: false },
-  { id: "2", name: "Bob", audio: true, video: false, speaking: true },
-  { id: "3", name: "Charlie", audio: true, video: false, speaking: false },
-  { id: "4", name: "David", audio: true, video: false, speaking: false },
-  { id: "5", name: "Eve", audio: false, video: false, speaking: false },
-  { id: "6", name: "Frank", audio: true, video: false, speaking: false },
-  { id: "7", name: "Grace", audio: true, video: false, speaking: false },
-  { id: "8", name: "Heidi", audio: true, video: false, speaking: false },
-  { id: "9", name: "Ivan", audio: false, video: false, speaking: false },
-];
+import { useRoom } from "@/hooks/use-room";
+import { VideoTile } from "@/views/room/video-tile";
+import { Spinner } from "@/components/ui/spinner";
 
 export function VideoGrid({
   asideOpen = false,
@@ -21,6 +18,8 @@ export function VideoGrid({
   asideOpen?: boolean;
   className?: string;
 }) {
+  const { participants } = useRoom();
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const tileRefs = useRef(new Map<string, HTMLDivElement>());
   const prevRectsRef = useRef(new Map<string, DOMRect>());
@@ -82,7 +81,7 @@ export function VideoGrid({
     const observer = new ResizeObserver(update);
     observer.observe(node);
     return () => observer.disconnect();
-  }, [PARTICIPANTS.length]);
+  }, [participants.length]);
 
   return (
     <div
@@ -97,19 +96,36 @@ export function VideoGrid({
         gridTemplateRows: `repeat(${rows}, 1fr)`,
       }}
     >
-      {PARTICIPANTS.map((tile) => (
-        <VideoTile
-          key={tile.id!}
-          name={tile.name}
-          audio={tile.audio}
-          video={tile.video}
-          speaking={tile.speaking}
-          ref={(el) => {
-            if (el) tileRefs.current.set(tile.id!, el);
-            else tileRefs.current.delete(tile.id!);
-          }}
-        />
-      ))}
+      {participants.length === 0 ? (
+        <Empty className="col-span-full flex h-full items-center justify-center">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Spinner data-icon="inline-start" />
+            </EmptyMedia>
+            <EmptyTitle>{t("room.empty")}</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
+      ) : (
+        participants.map((tile) => (
+          <VideoTile
+            key={`${tile.peer}-${tile.label}`}
+            peer={tile.peer}
+            label={tile.label}
+            name={tile.name}
+            audio={tile.audio}
+            video={tile.video}
+            mirror={tile.mirror}
+            muted={tile.muted}
+            speaking={tile.speaking}
+            stream={tile.stream}
+            ref={(el) => {
+              const id = `${tile.peer}-${tile.label}`;
+              if (el) tileRefs.current.set(id, el);
+              else tileRefs.current.delete(id);
+            }}
+          />
+        ))
+      )}
     </div>
   );
 }

@@ -122,7 +122,7 @@ export function MediaButton({ kind, enabled, onToggle }: MediaButtonProps) {
 
   const startMediaProcessing = async (deviceId: string) => {
     const stream = await navigator.mediaDevices.getUserMedia({
-      [kind]: deviceId ? { deviceId: { exact: deviceId } } : true,
+      [kind]: deviceId ? { deviceId } : true,
     });
     streamRef.current = stream;
     const foundDevices = await enumerateDevices(kind);

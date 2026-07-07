@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { toast } from "sonner";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { roomId } from "@/lib/room-info";
 import { Button } from "@/components/ui/button";
@@ -7,13 +9,15 @@ import { Input } from "@/components/ui/input";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Separator } from "@/components/ui/separator";
 import { MediaButton } from "@/components/media-button";
+import { Spinner } from "@/components/ui/spinner";
 import { useStorage } from "@/hooks/use-storage";
 import { useRoom } from "@/hooks/use-room";
 
-export function LobbyView({ onJoin }: { onJoin: () => void }) {
+export function LobbyView({ onJoin }: { onJoin: () => Promise<void> }) {
   const { t } = useTranslation();
   const { value: name, setValue: setName } = useStorage("username");
   const { mic, cam, toggleMic, toggleCam } = useRoom();
+  const [loading, setLoading] = useState(false);
 
   return (
     <div className="flex h-max w-96 flex-col overflow-auto rounded bg-background shadow">
@@ -33,9 +37,18 @@ export function LobbyView({ onJoin }: { onJoin: () => void }) {
 
       <form
         className="flex flex-col gap-6 p-4"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
-          onJoin();
+          setLoading(true);
+          try {
+            await onJoin();
+          } catch (err) {
+            toast.error(`${(err as Error)?.message ?? err}`, {
+              position: "top-center",
+            });
+          } finally {
+            setLoading(false);
+          }
         }}
       >
         <Field>
@@ -50,7 +63,12 @@ export function LobbyView({ onJoin }: { onJoin: () => void }) {
             placeholder={t("common.defaultUserName")}
           />
         </Field>
-        <Button type="submit" className="cursor-pointer py-5 text-base">
+        <Button
+          type="submit"
+          className="cursor-pointer py-5 text-base"
+          disabled={loading}
+        >
+          {loading && <Spinner data-icon="inline-start" />}
           {t("lobby.joinRoom")}
           <HugeiconsIcon icon={ArrowRight01Icon} />
         </Button>
