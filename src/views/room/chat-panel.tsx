@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useRoom } from "@/hooks/use-room";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Cancel01Icon,
@@ -30,11 +31,9 @@ type ChatPanelProps = { className?: string; onClose?: () => void };
 
 export function ChatPanel({ className = "", onClose }: ChatPanelProps) {
   const { t } = useTranslation();
+  const { messages, setMessages } = useRoom();
   const [isOpening, setIsOpening] = useState(false);
   const [text, setText] = useState("");
-  const [messages, setMessages] = useState<
-    { author: string; text: string; time: number }[]
-  >([]);
   const lastRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

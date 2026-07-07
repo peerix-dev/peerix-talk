@@ -24,6 +24,7 @@ import { MediaButton } from "@/components/media-button";
 import { VideoGrid } from "@/views/room/video-grid";
 import { ChatPanel } from "@/views/room/chat-panel";
 import { ShareDialog } from "@/views/share-dialog";
+import { useRoom } from "@/hooks/use-room";
 
 function formatDuration(s: number): string {
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -35,11 +36,9 @@ function formatDuration(s: number): string {
 
 export function RoomView({ onLeave }: { onLeave: () => void }) {
   const { t } = useTranslation();
+  const { mic, cam, scr, toggleMic, toggleCam, toggleScr } = useRoom();
   const [chatOpen, setChatOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
-  const [mic, setMic] = useState(false);
-  const [cam, setCam] = useState(false);
-  const [screen, setScreen] = useState(false);
   const [elapsed, setElapsed] = useState(0);
 
   useEffect(() => {
@@ -62,23 +61,15 @@ export function RoomView({ onLeave }: { onLeave: () => void }) {
         </div>
         <div className="grow" />
         <div className="flex gap-2">
-          <MediaButton
-            kind="audio"
-            enabled={mic}
-            onToggle={() => setMic(!mic)}
-          />
-          <MediaButton
-            kind="video"
-            enabled={cam}
-            onToggle={() => setCam(!cam)}
-          />
+          <MediaButton kind="audio" enabled={mic} onToggle={toggleMic} />
+          <MediaButton kind="video" enabled={cam} onToggle={toggleCam} />
           {/* Desktop: show buttons inline */}
           <div className="hidden gap-2 sm:flex">
             {!isMobile() && (
               <Button
                 size="lg"
-                variant="outline"
-                onClick={() => setScreen(!screen)}
+                variant={scr ? "default" : "outline"}
+                onClick={() => toggleScr()}
                 aria-label={t("room.screenShare")}
               >
                 <HugeiconsIcon icon={ComputerScreenShareIcon} />
@@ -125,7 +116,7 @@ export function RoomView({ onLeave }: { onLeave: () => void }) {
             <DropdownMenuContent align="end">
               <DropdownMenuGroup>
                 {!isMobile() && (
-                  <DropdownMenuItem onClick={() => setScreen(!screen)}>
+                  <DropdownMenuItem onClick={() => toggleScr()}>
                     <HugeiconsIcon icon={ComputerScreenShareIcon} />
                     {t("room.screenShare")}
                   </DropdownMenuItem>

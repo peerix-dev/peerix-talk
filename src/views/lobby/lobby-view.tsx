@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
@@ -9,12 +8,12 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { Separator } from "@/components/ui/separator";
 import { MediaButton } from "@/components/media-button";
 import { useStorage } from "@/hooks/use-storage";
+import { useRoom } from "@/hooks/use-room";
 
 export function LobbyView({ onJoin }: { onJoin: () => void }) {
   const { t } = useTranslation();
   const { value: name, setValue: setName } = useStorage("username");
-  const [mic, setMic] = useState(false);
-  const [cam, setCam] = useState(false);
+  const { mic, cam, toggleMic, toggleCam } = useRoom();
 
   return (
     <div className="flex h-max w-96 flex-col overflow-auto rounded bg-background shadow">
@@ -27,16 +26,8 @@ export function LobbyView({ onJoin }: { onJoin: () => void }) {
         </div>
         <div className="grow" />
         <div className="flex gap-2">
-          <MediaButton
-            kind="audio"
-            enabled={mic}
-            onToggle={() => setMic(!mic)}
-          />
-          <MediaButton
-            kind="video"
-            enabled={cam}
-            onToggle={() => setCam(!cam)}
-          />
+          <MediaButton kind="audio" enabled={mic} onToggle={toggleMic} />
+          <MediaButton kind="video" enabled={cam} onToggle={toggleCam} />
         </div>
       </header>
 
