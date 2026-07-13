@@ -36,7 +36,7 @@ function formatDuration(s: number): string {
 
 export function RoomView({ onLeave }: { onLeave: () => void }) {
   const { t } = useTranslation();
-  const { mic, cam, scr, toggleMic, toggleCam, toggleScr } = useRoom();
+  const { mic, cam, scr, messages, toggleMic, toggleCam, toggleScr } = useRoom();
   const [chatOpen, setChatOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [elapsed, setElapsed] = useState(0);
@@ -45,6 +45,12 @@ export function RoomView({ onLeave }: { onLeave: () => void }) {
     const id = setInterval(() => setElapsed((d) => d + 1), 1000);
     return () => clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      setChatOpen(true);
+    }
+  }, [messages]);
 
   return (
     <div className="flex h-full w-full flex-col bg-background min-w-64">

@@ -1,6 +1,8 @@
 import { useState, useCallback, useContext, createContext } from "react";
 
 export interface Message {
+  id: string;
+  peer?: string;
   author: string;
   text: string;
   time: number;

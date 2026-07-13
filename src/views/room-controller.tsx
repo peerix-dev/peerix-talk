@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { roomId } from "@/lib/room-info";
 import { useRouter } from "@/hooks/use-router";
 import { useStorage } from "@/hooks/use-storage";
-import { useRoom } from "@/hooks/use-room";
+import { useRoom, type Message } from "@/hooks/use-room";
 import { LobbyView } from "@/views/lobby/lobby-view";
 import { RoomView } from "@/views/room/room-view";
 
@@ -44,6 +44,7 @@ export function RoomController() {
     mic,
     cam,
     scr,
+    messages,
     toggleMic,
     toggleCam,
     toggleScr,
@@ -95,6 +96,15 @@ export function RoomController() {
       peerRef.current?.unshare({ label: "screen" });
     }
   }, [scr]);
+
+  useEffect(() => {
+    const msg = messages[messages.length - 1];
+    const peer = peerRef.current;
+    if (peer && msg && !msg.peer) {
+      console.log("send", msg);
+      peer.send(msg, { label: "chat" });
+    }
+  }, [messages]);
 
   const handleJoin = useCallback(async () => {
     const driver = new BroadcastChannelDriver();
@@ -187,6 +197,14 @@ export function RoomController() {
           : [...prev, entry];
       });
     });
+    peer.on("channel:message", async (e) => {
+      const { remote, data } = e;
+      const message = (await data) as Message;
+      console.log("channel:message", e);
+      setMessages((prev) => [...prev, { ...message, peer: remote.id }]);
+    });
+
+    peer.open({ label: "chat" });
 
     await peer.join({ room: roomId, metadata: { name } });
 

@@ -8,6 +8,7 @@ import {
   SentIcon,
 } from "@hugeicons/core-free-icons";
 import { cn } from "@/lib/utils";
+import { useStorage } from "@/hooks/use-storage";
 import {
   Card,
   CardHeader,
@@ -35,6 +36,7 @@ export function ChatPanel({
   onClose?: () => void;
 }) {
   const { t } = useTranslation();
+  const { value: username } = useStorage("username");
   const { messages, setMessages } = useRoom();
   const [isOpening, setIsOpening] = useState(false);
   const [text, setText] = useState("");
@@ -54,7 +56,7 @@ export function ChatPanel({
     if (!trimmed) return;
     setMessages((prev) => [
       ...prev,
-      { author: t("chat.author"), text: trimmed, time: Date.now() },
+      { id: crypto.randomUUID(), author: username, text: trimmed, time: Date.now() },
     ]);
     setText("");
   };
@@ -93,7 +95,7 @@ export function ChatPanel({
           <ScrollArea className="h-full">
             <div className="flex flex-col gap-2 p-4">
               {messages.map((msg, i) => (
-                <div key={i} ref={i === messages.length - 1 ? lastRef : null}>
+                <div key={msg.id} ref={i === messages.length - 1 ? lastRef : null}>
                   <ChatMessage
                     author={msg.author}
                     text={msg.text}
