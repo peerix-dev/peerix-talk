@@ -96,7 +96,12 @@ export function RoomView({ onLeave, onSend }: { onLeave: () => void; onSend: (te
           {/* Desktop: separator + leave */}
           <div className="hidden sm:inline-flex items-center gap-2">
             <Separator orientation="vertical" />
-            <Button variant="destructive" size="icon-lg" onClick={onLeave}>
+            <Button
+              variant="destructive"
+              size="icon-lg"
+              onClick={onLeave}
+              aria-label={t("room.leave")}
+            >
               <HugeiconsIcon icon={LogoutCircle01Icon} />
             </Button>
           </div>

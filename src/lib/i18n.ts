@@ -9,6 +9,7 @@ i18n
   .use(initReactI18next) // Passes i18n down to react-i18next
   .init({
     fallbackLng: "en",
+    supportedLngs: ["en", "de", "ru"],
     debug: import.meta.env.DEV, // Logs issues in development mode
     interpolation: {
       escapeValue: false, // React already safeguards against XSS

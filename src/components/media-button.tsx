@@ -45,6 +45,7 @@ export function MediaButton({ kind, enabled, onToggle }: MediaButtonProps) {
   const { t } = useTranslation();
   const [devices, loadDevices] = useMediaDevices(kind);
   const streamRef = useRef<MediaStream | null>(null);
+  const effectiveDeviceIdRef = useRef<string | null>(null);
   const [streamState, setStreamState] = useState<MediaStream | null>(null);
   const audioLevels = useAudioLevels(kind === "audio" ? streamState : null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -71,8 +72,20 @@ export function MediaButton({ kind, enabled, onToggle }: MediaButtonProps) {
   }, []);
 
   const handleOpenChange = (open: boolean) => {
+    // Persist effective device when closing so the next open starts correct
+    if (!open && effectiveDeviceIdRef.current) {
+      setStoredDeviceId(effectiveDeviceIdRef.current);
+    }
     setIsDropdownOpen(open);
   };
+
+  // Default to first device when stored device is missing or invalid
+  const isValidDevice = devices.some((d) => d.deviceId === storedDeviceId);
+  const effectiveDeviceId =
+    storedDeviceId && isValidDevice ? storedDeviceId : devices[0]?.deviceId;
+
+  // Track latest effectiveDeviceId in a ref to avoid stale closures
+  effectiveDeviceIdRef.current = effectiveDeviceId;
 
   // Open: load devices + start media after the dropdown is rendered
   useEffect(() => {
@@ -83,7 +96,7 @@ export function MediaButton({ kind, enabled, onToggle }: MediaButtonProps) {
       requestAnimationFrame(async () => {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({
-            [kind]: storedDeviceId ? { deviceId: storedDeviceId } : true,
+            [kind]: effectiveDeviceId ? { deviceId: effectiveDeviceId } : true,
           });
           streamRef.current = stream;
           setStreamState(stream);
@@ -200,7 +213,7 @@ export function MediaButton({ kind, enabled, onToggle }: MediaButtonProps) {
         )}
         <DropdownMenuGroup>
           <DropdownMenuRadioGroup
-            value={storedDeviceId}
+            value={effectiveDeviceId}
             onValueChange={handleDeviceChange}
           >
             {devices.map((device) => (

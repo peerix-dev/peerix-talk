@@ -137,12 +137,16 @@ export function usePeer() {
 
   const leave = useCallback(async () => {
     peerRef.current?.unshare({ label: "camera" });
+    peerRef.current?.unshare({ label: "screen" });
     await peerRef.current?.leave();
     peerRef.current = null;
     setParticipants([]);
     setMessages([]);
+    toggleCam(false);
+    toggleMic(false);
+    toggleScr(false);
     navigate("lobby");
-  }, [navigate, setParticipants, setMessages]);
+  }, [navigate, setParticipants, setMessages, toggleCam, toggleMic, toggleScr]);
 
   return { peerRef, join, leave };
 }
