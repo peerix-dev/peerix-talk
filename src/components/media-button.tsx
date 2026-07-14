@@ -20,6 +20,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useStorage } from "@/hooks/use-storage";
+import { useAudioLevels } from "@/hooks/use-audio-analysis";
+import { useMediaDevices } from "@/hooks/use-media-devices";
 
 type MediaKind = "audio" | "video";
 
@@ -29,82 +31,10 @@ interface MediaButtonProps {
   onToggle: () => void;
 }
 
-export interface MediaDevice {
-  deviceId: string;
-  label: string;
-}
-
-const BAR_COUNT = 21;
-
 const ICON_MAP = {
   audio: { on: Mic01Icon, off: MicOff01Icon },
   video: { on: VideoIcon, off: VideoOffIcon },
 } as const;
-
-async function enumerateDevices(kind: MediaKind): Promise<MediaDevice[]> {
-  try {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    return devices
-      .filter((d) => d.kind === `${kind}input`)
-      .map(
-        (d) =>
-          ({
-            deviceId: d.deviceId,
-            label:
-              d.label ||
-              `${kind === "audio" ? "Microphone" : "Camera"} ${d.deviceId.slice(0, 5)}`,
-          }) as MediaDevice,
-      );
-  } catch {
-    return [];
-  }
-}
-
-function startAudioAnalysis(
-  stream: MediaStream,
-  barCount: number,
-  onUpdate: (levels: number[]) => void,
-): () => void {
-  let timer: ReturnType<typeof setTimeout>;
-
-  let audioContext: AudioContext | null = new AudioContext();
-  const source = audioContext.createMediaStreamSource(stream);
-  const analyser = audioContext.createAnalyser();
-  analyser.fftSize = 64;
-  analyser.smoothingTimeConstant = 0.8;
-
-  source.connect(analyser);
-
-  const bufferLength = analyser.frequencyBinCount;
-  const dataArray = new Uint8Array(bufferLength);
-  const binsPerBar = Math.floor(bufferLength / barCount);
-
-  function updateLevels() {
-    analyser.getByteFrequencyData(dataArray);
-
-    const newLevels: number[] = [];
-    for (let i = 0; i < barCount; i++) {
-      let sum = 0;
-      for (let j = 0; j < binsPerBar; j++) {
-        sum += dataArray[i * binsPerBar + j];
-      }
-      newLevels.push(sum / binsPerBar / 255);
-    }
-    onUpdate(newLevels);
-    timer = setTimeout(updateLevels, 100);
-  }
-
-  updateLevels();
-
-  return () => {
-    clearTimeout(timer);
-    if (audioContext) {
-      audioContext.close();
-      audioContext = null;
-    }
-    onUpdate(Array(barCount).fill(0));
-  };
-}
 
 export function MediaButton({ kind, enabled, onToggle }: MediaButtonProps) {
   const storageKey = `${kind}DeviceId`;
@@ -113,11 +43,10 @@ export function MediaButton({ kind, enabled, onToggle }: MediaButtonProps) {
 
   const icon = ICON_MAP[kind][enabled ? "on" : "off"];
   const { t } = useTranslation();
-  const [devices, setDevices] = useState<MediaDevice[]>([]);
-  const [audioLevels, setAudioLevels] = useState(Array(BAR_COUNT).fill(0));
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const [devices, loadDevices] = useMediaDevices(kind);
   const streamRef = useRef<MediaStream | null>(null);
-  const disposeAudioRef = useRef<() => void>(null);
+  const audioLevels = useAudioLevels(streamRef.current);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [videoReady, setVideoReady] = useState(false);
 
   const startMediaProcessing = async (deviceId: string) => {
@@ -125,24 +54,16 @@ export function MediaButton({ kind, enabled, onToggle }: MediaButtonProps) {
       [kind]: deviceId ? { deviceId } : true,
     });
     streamRef.current = stream;
-    const foundDevices = await enumerateDevices(kind);
-    setDevices(foundDevices);
-    if (foundDevices.length && !deviceId) {
-      setStoredDeviceId(foundDevices[0].deviceId);
+    await loadDevices();
+    if (devices.length === 0) {
+      const found = await navigator.mediaDevices.enumerateDevices();
+      const first = found.find((d) => d.kind === `${kind}input`);
+      if (first) setStoredDeviceId(first.deviceId);
     }
-    if (kind === "video") {
+    if (kind === "video" && videoRef.current) {
       setVideoReady(false);
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play().catch(() => {});
-      }
-    } else {
-      disposeAudioRef.current?.();
-      disposeAudioRef.current = startAudioAnalysis(
-        stream,
-        BAR_COUNT,
-        (levels) => setAudioLevels(levels),
-      );
+      videoRef.current.srcObject = stream;
+      videoRef.current.play().catch(() => {});
     }
   };
 
@@ -152,7 +73,6 @@ export function MediaButton({ kind, enabled, onToggle }: MediaButtonProps) {
     }
     streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;
-    disposeAudioRef.current?.();
   };
 
   const handleOpenChange = async (open: boolean) => {
