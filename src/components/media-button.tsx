@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -45,45 +45,81 @@ export function MediaButton({ kind, enabled, onToggle }: MediaButtonProps) {
   const { t } = useTranslation();
   const [devices, loadDevices] = useMediaDevices(kind);
   const streamRef = useRef<MediaStream | null>(null);
-  const audioLevels = useAudioLevels(streamRef.current);
+  const [streamState, setStreamState] = useState<MediaStream | null>(null);
+  const audioLevels = useAudioLevels(kind === "audio" ? streamState : null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoReady, setVideoReady] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const startMediaProcessing = async (deviceId: string) => {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      [kind]: deviceId ? { deviceId } : true,
-    });
-    streamRef.current = stream;
-    await loadDevices();
-    if (devices.length === 0) {
-      const found = await navigator.mediaDevices.enumerateDevices();
-      const first = found.find((d) => d.kind === `${kind}input`);
-      if (first) setStoredDeviceId(first.deviceId);
-    }
-    if (kind === "video" && videoRef.current) {
+  // Keep video element in sync with stream changes
+  useEffect(() => {
+    if (kind !== "video") return;
+    if (streamState && videoRef.current) {
       setVideoReady(false);
-      videoRef.current.srcObject = stream;
+      videoRef.current.srcObject = streamState;
       videoRef.current.play().catch(() => {});
     }
-  };
+  }, [streamState]);
 
-  const stopMediaProcessing = () => {
+  const stopMediaProcessing = useCallback(() => {
     if (videoRef.current?.srcObject) {
       videoRef.current.srcObject = null;
     }
     streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;
+    setStreamState(null);
+  }, []);
+
+  const handleOpenChange = (open: boolean) => {
+    setIsDropdownOpen(open);
   };
 
-  const handleOpenChange = async (open: boolean) => {
-    if (open) startMediaProcessing(storedDeviceId);
-    else stopMediaProcessing();
-  };
+  // Open: load devices + start media after the dropdown is rendered
+  useEffect(() => {
+    if (!isDropdownOpen) return;
 
-  const handleDeviceChange = (deviceId: string) => {
+    (async () => {
+      await loadDevices();
+      requestAnimationFrame(async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            [kind]: storedDeviceId ? { deviceId: storedDeviceId } : true,
+          });
+          streamRef.current = stream;
+          setStreamState(stream);
+          if (kind === "video" && videoRef.current) {
+            setVideoReady(false);
+            videoRef.current.srcObject = stream;
+            videoRef.current.play().catch(() => {});
+          }
+        } catch {
+          // permission denied or cancelled
+        }
+      });
+    })();
+
+    return () => {
+      requestAnimationFrame(() => stopMediaProcessing());
+    };
+  }, [isDropdownOpen]);
+
+  const handleDeviceChange = async (deviceId: string) => {
     setStoredDeviceId(deviceId);
     stopMediaProcessing();
-    startMediaProcessing(deviceId);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        [kind]: deviceId ? { deviceId } : true,
+      });
+      streamRef.current = stream;
+      setStreamState(stream);
+      if (kind === "video" && videoRef.current) {
+        setVideoReady(false);
+        videoRef.current.srcObject = stream;
+        videoRef.current.play().catch(() => {});
+      }
+    } catch {
+      // permission denied
+    }
   };
 
   useEffect(() => {
@@ -91,7 +127,7 @@ export function MediaButton({ kind, enabled, onToggle }: MediaButtonProps) {
   }, []);
 
   return (
-    <DropdownMenu onOpenChange={handleOpenChange}>
+    <DropdownMenu open={isDropdownOpen} onOpenChange={handleOpenChange}>
       <ButtonGroup>
         <Button
           size="lg"
