@@ -29,17 +29,27 @@ export function ShareDialog({
 
   useEffect(() => {
     if (!open || !inviteLink) return;
-    QRCode.toDataURL(inviteLink, { width: 256, margin: 1 })
-      .then(setQrSrc)
-      .catch(console.error);
+
+    async function generate() {
+      try {
+        setQrSrc(await QRCode.toDataURL(inviteLink, { width: 256, margin: 1 }));
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    generate();
   }, [open, inviteLink]);
 
-  const copy = () => {
-    navigator.clipboard.writeText(inviteLink).then(() => {
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(inviteLink);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    }, console.error);
-  };
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
