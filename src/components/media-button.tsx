@@ -72,9 +72,13 @@ export function MediaButton({ kind, enabled, onToggle }: MediaButtonProps) {
   }, []);
 
   const handleOpenChange = (open: boolean) => {
-    // Persist effective device when closing so the next open starts correct
-    if (!open && effectiveDeviceIdRef.current) {
-      setStoredDeviceId(effectiveDeviceIdRef.current);
+    if (!open) {
+      // Persist effective device when closing so the next open starts correct
+      if (effectiveDeviceIdRef.current) {
+        setStoredDeviceId(effectiveDeviceIdRef.current);
+      }
+      // Stop preview streams immediately when dropdown closes
+      stopMediaProcessing();
     }
     setIsDropdownOpen(open);
   };
