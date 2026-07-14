@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useRoom } from "@/hooks/use-room";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Cancel01Icon,
@@ -8,7 +7,6 @@ import {
   SentIcon,
 } from "@hugeicons/core-free-icons";
 import { cn } from "@/lib/utils";
-import { useStorage } from "@/hooks/use-storage";
 import {
   Card,
   CardHeader,
@@ -27,17 +25,19 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { ChatMessage } from "@/views/room/chat-message";
+import { useRoom } from "@/hooks/use-room";
 
 export function ChatPanel({
   className = "",
   onClose,
+  onSend,
 }: {
   className?: string;
   onClose?: () => void;
+  onSend: (text: string) => void;
 }) {
   const { t } = useTranslation();
-  const { value: username } = useStorage("username");
-  const { messages, setMessages } = useRoom();
+  const { messages } = useRoom();
   const [isOpening, setIsOpening] = useState(false);
   const [text, setText] = useState("");
   const lastRef = useRef<HTMLDivElement>(null);
@@ -51,13 +51,10 @@ export function ChatPanel({
     lastRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const send = () => {
+  const handleSend = () => {
     const trimmed = text.trim();
     if (!trimmed) return;
-    setMessages((prev) => [
-      ...prev,
-      { id: crypto.randomUUID(), author: username, text: trimmed, time: Date.now() },
-    ]);
+    onSend(trimmed);
     setText("");
   };
 
@@ -116,11 +113,11 @@ export function ChatPanel({
             value={text}
             maxLength={1000}
             onChange={(e) => setText(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && send()}
+            onKeyDown={(e) => e.key === "Enter" && handleSend()}
           />
           <Button
             className="cursor-pointer"
-            onClick={send}
+            onClick={handleSend}
             variant="outline"
             aria-label={t("chat.send")}
           >

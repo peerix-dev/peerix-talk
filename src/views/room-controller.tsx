@@ -4,39 +4,11 @@ import { toast } from "sonner";
 import { roomId } from "@/lib/room-info";
 import { useRouter } from "@/hooks/use-router";
 import { useStorage } from "@/hooks/use-storage";
-import { useRoom, type Message } from "@/hooks/use-room";
+import { useRoom } from "@/hooks/use-room";
+import type { Message } from "@/lib/types";
+import { getUserMedia, getDisplayMedia } from "@/lib/media";
 import { LobbyView } from "@/views/lobby/lobby-view";
 import { RoomView } from "@/views/room/room-view";
-
-async function getUserMedia(options: {
-  audio: boolean;
-  video: boolean;
-  audioDeviceId?: string;
-  videoDeviceId?: string;
-}): Promise<MediaStream> {
-  const { audio, video, audioDeviceId, videoDeviceId } = options;
-  const stream = await navigator.mediaDevices.getUserMedia({
-    audio: audio
-      ? audioDeviceId !== undefined
-        ? { deviceId: audioDeviceId }
-        : true
-      : false,
-    video: video
-      ? videoDeviceId !== undefined
-        ? { deviceId: videoDeviceId }
-        : true
-      : false,
-  });
-  return stream;
-}
-
-async function getDisplayMedia(): Promise<MediaStream> {
-  const stream = await navigator.mediaDevices.getDisplayMedia({
-    audio: false,
-    video: true,
-  });
-  return stream;
-}
 
 export function RoomController() {
   const { route, navigate } = useRouter();
@@ -229,10 +201,20 @@ export function RoomController() {
     navigate("lobby");
   }, [navigate, setParticipants, setMessages]);
 
+  const handleSend = useCallback(
+    (text: string) => {
+      setMessages((prev) => [
+        ...prev,
+        { id: crypto.randomUUID(), author: username || "Guest", text, time: Date.now() },
+      ]);
+    },
+    [username, setMessages],
+  );
+
   return (
     <div className="w-full h-full bg-muted flex items-center justify-center">
       {route === "lobby" && <LobbyView onJoin={handleJoin} />}
-      {route === "room" && <RoomView onLeave={handleLeave} />}
+      {route === "room" && <RoomView onLeave={handleLeave} onSend={handleSend} />}
     </div>
   );
 }

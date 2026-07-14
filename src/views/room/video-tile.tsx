@@ -1,6 +1,6 @@
 import { forwardRef, useEffect, useRef, useState } from "react";
 import { toSvg } from "jdenticon";
-import type { Participant } from "@/hooks/use-room";
+import type { Participant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { MicOff02Icon } from "@hugeicons/core-free-icons";

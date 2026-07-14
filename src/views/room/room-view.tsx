@@ -9,7 +9,8 @@ import {
   MoreVerticalIcon,
 } from "@hugeicons/core-free-icons";
 import { roomId } from "@/lib/room-info";
-import { isMobile } from "@/lib/utils";
+import { formatDuration } from "@/lib/format";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -26,20 +27,13 @@ import { ChatPanel } from "@/views/room/chat-panel";
 import { ShareDialog } from "@/views/share-dialog";
 import { useRoom } from "@/hooks/use-room";
 
-function formatDuration(s: number): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sec = s % 60;
-  return h ? `${pad(h)}:${pad(m)}:${pad(sec)}` : `${pad(m)}:${pad(sec)}`;
-}
-
-export function RoomView({ onLeave }: { onLeave: () => void }) {
+export function RoomView({ onLeave, onSend }: { onLeave: () => void; onSend: (text: string) => void }) {
   const { t } = useTranslation();
   const { mic, cam, scr, messages, toggleMic, toggleCam, toggleScr } = useRoom();
   const [chatOpen, setChatOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [elapsed, setElapsed] = useState(0);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const id = setInterval(() => setElapsed((d) => d + 1), 1000);
@@ -71,7 +65,7 @@ export function RoomView({ onLeave }: { onLeave: () => void }) {
           <MediaButton kind="video" enabled={cam} onToggle={toggleCam} />
           {/* Desktop: show buttons inline */}
           <div className="hidden gap-2 sm:flex">
-            {!isMobile() && (
+            {!isMobile && (
               <Button
                 size="lg"
                 variant={scr ? "default" : "outline"}
@@ -121,7 +115,7 @@ export function RoomView({ onLeave }: { onLeave: () => void }) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuGroup>
-                {!isMobile() && (
+                {!isMobile && (
                   <DropdownMenuItem onClick={() => toggleScr()}>
                     <HugeiconsIcon icon={ComputerScreenShareIcon} />
                     {t("room.screenShare")}
@@ -148,7 +142,7 @@ export function RoomView({ onLeave }: { onLeave: () => void }) {
 
       <main className="flex flex-1 gap-4 overflow-hidden p-4">
         <VideoGrid asideOpen={chatOpen} />
-        {chatOpen && <ChatPanel onClose={() => setChatOpen(false)} />}
+        {chatOpen && <ChatPanel onClose={() => setChatOpen(false)} onSend={onSend} />}
       </main>
 
       <ShareDialog open={shareOpen} onOpenChange={setShareOpen} />
