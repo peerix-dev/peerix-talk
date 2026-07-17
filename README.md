@@ -33,26 +33,51 @@ Open <http://localhost:5173>.
 
 ### Configure Signaling
 
-Edit `public/config.json` and set `useDriver` to your preferred driver (MQTT, NATS, or SSE):
+Edit `public/config.json`. BroadcastChannel is used by default for local testing. For production, set a `driver`:
 
 ```json
 {
-  "useDriver": "mqtt",
-  "drivers": { … }
+  "driver": {
+    "type": "mqtt",
+    "server": "wss://broker.emqx.io:8084/mqtt",
+    "prefix": "peerix/"
+  },
+  "iceServers": [{ "urls": "stun:stun.l.google.com:19302" }],
+  "iceTransportPolicy": "all"
 }
 ```
 
-Supported drivers: `nats`, `mqtt`, `sse`. When `useDriver` is `null` (default), the app falls back to WebSocket signaling.
+Supported drivers (drop-in replacements for the `driver` object):
+
+NATS driver:
+
+```json
+{
+  "type": "nats",
+  "servers": ["wss://demo.nats.io:8443"],
+  "prefix": "peerix."
+}
+```
+
+SSE driver ([Mercure](https://mercure.rocks/)):
+
+```json
+{
+  "type": "sse",
+  "url": "http://localhost:8080/.well-known/mercure",
+  "publisherJwtKey": "eyJhbGciOiJIUzI1NiJ9.eyJtZXJjdXJlIjp7InB1Ymxpc2giOlsiKiJdLCJzdWJzY3JpYmUiOlsiKiJdfX0.bVXdlWXwfw9ySx7-iV5OpUSHo34RkjUdVzDLBcc6l_g"
+}
+```
 
 ## Commands
 
-| Script            | Description                    |
-| ----------------- | ------------------------------ |
-| `npm run dev`     | Development server             |
-| `npm run build`   | Type-check + production build  |
-| `npm run typecheck` | Run type-check only         |
-| `npm run preview` | Serve production build locally |
-| `npm run test`    | Run Playwright e2e tests       |
+| Script              | Description                    |
+| ------------------- | ------------------------------ |
+| `npm run dev`       | Development server             |
+| `npm run build`     | Type-check + production build  |
+| `npm run typecheck` | Run type-check only            |
+| `npm run preview`   | Serve production build locally |
+| `npm run test`      | Run Playwright e2e tests       |
 
 ## Architecture
 

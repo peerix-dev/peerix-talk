@@ -1,21 +1,29 @@
+export interface MqttDriverConfig {
+  type: "mqtt";
+  module: string;
+  server: string;
+  prefix: string;
+}
+
+export interface NatsDriverConfig {
+  type: "nats";
+  module: string;
+  servers: string[];
+  prefix: string;
+}
+
+export interface SseDriverConfig {
+  type: "sse";
+  url: string;
+  publisherJwtKey: string;
+}
+
+export type DriverConfig = MqttDriverConfig | NatsDriverConfig | SseDriverConfig;
+
 export interface AppConfig {
-  useDriver: "nats" | "mqtt" | "sse" | null;
-  drivers: {
-    mqtt?: {
-      module: string;
-      server: string;
-      prefix: string;
-    };
-    nats?: {
-      module: string;
-      servers: string[];
-      prefix: string;
-    };
-    sse?: {
-      url: string;
-      publisherJwtKey: string;
-    };
-  };
+  driver: DriverConfig | null;
+  iceServers?: RTCIceServer[];
+  iceTransportPolicy?: RTCIceTransportPolicy;
 }
 
 let configPromise: Promise<AppConfig> | null = null;
@@ -30,8 +38,9 @@ export async function loadConfig(): Promise<AppConfig> {
       if (!res.ok) throw new Error(`Failed to load config: ${res.status}`);
       const data = await res.json();
       const cfg: AppConfig = {
-        useDriver: data.useDriver ?? null,
-        drivers: data.drivers ?? {},
+        driver: data.driver ?? null,
+        iceServers: data.iceServers,
+        iceTransportPolicy: data.iceTransportPolicy,
       };
       resolvedConfig = cfg;
       return cfg;

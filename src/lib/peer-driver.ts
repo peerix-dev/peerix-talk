@@ -1,5 +1,5 @@
 import { Peer, BroadcastChannelDriver, NatsDriver, MqttDriver, SseDriver, type Driver } from "peerix";
-import { loadConfig } from "@/lib/config";
+import { getConfig, loadConfig } from "@/lib/config";
 
 /**
  * Creates a Peerix Driver instance based on the loaded config.
@@ -12,52 +12,51 @@ import { loadConfig } from "@/lib/config";
 export async function createDriver(): Promise<Driver> {
   const cfg = await loadConfig();
 
-  switch (cfg.useDriver) {
-    case "nats": {
-      const natsCfg = cfg.drivers.nats;
-      if (!natsCfg) throw new Error("NATS driver configured but no NATS options in config");
+  if (!cfg.driver) {
+    return new BroadcastChannelDriver();
+  }
 
-      const { wsconnect } = await import(/* @vite-ignore */ natsCfg.module);
-      const nc = await wsconnect({ servers: natsCfg.servers, noEcho: true });
-      return new NatsDriver({ nc, prefix: natsCfg.prefix });
+  switch (cfg.driver.type) {
+    case "nats": {
+      const { wsconnect } = await import("@nats-io/nats-core") as any;
+      const nc = await wsconnect({ servers: cfg.driver.servers, noEcho: true });
+      return new NatsDriver({ nc, prefix: cfg.driver.prefix });
     }
 
     case "mqtt": {
-      const mqttCfg = cfg.drivers.mqtt;
-      if (!mqttCfg) throw new Error("MQTT driver configured but no MQTT options in config");
-
-      const mqtt = await import(/* @vite-ignore */ mqttCfg.module);
+      const mqtt = await import("mqtt") as any;
       const connect = mqtt.connect || mqtt.default?.connect;
       if (!connect) throw new Error("mqtt module does not export connect");
 
-      const client = connect(mqttCfg.server);
-      return new MqttDriver({ client, prefix: mqttCfg.prefix });
+      const client = connect(cfg.driver.server);
+      return new MqttDriver({ client, prefix: cfg.driver.prefix });
     }
 
     case "sse": {
-      const sseCfg = cfg.drivers.sse;
-      if (!sseCfg) throw new Error("SSE driver configured but no SSE options in config");
-
       return new SseDriver({
-        url: sseCfg.url,
+        url: cfg.driver.url,
         subscriber: {},
         publisher: {
           headers: {
-            Authorization: `Bearer ${sseCfg.publisherJwtKey}`,
+            Authorization: `Bearer ${cfg.driver.publisherJwtKey}`,
           },
         },
       });
     }
-
-    default:
-      return new BroadcastChannelDriver();
   }
 }
 
 /**
- * Creates a Peer with the configured driver.
+ * Creates a Peer with the configured driver and ICE settings.
  */
 export async function createPeer(): Promise<Peer> {
   const driver = await createDriver();
-  return new Peer({ driver });
+  const cfg = getConfig();
+  return new Peer({
+    driver,
+    iceServers: cfg?.iceServers,
+    iceTransportPolicy: cfg?.iceTransportPolicy,
+  });
 }
+
+
