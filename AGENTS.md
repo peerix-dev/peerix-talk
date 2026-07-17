@@ -51,7 +51,7 @@ index.html          # HTML template
 | `npm run dev`       | Dev server (`http://localhost:5173`) |
 | `npm run build`     | Type-check then production build     |
 | `npm run preview`   | Preview production build             |
-| `npm run typecheck` | Run type-check                       |
+| `npm run typecheck` | Run type-check only                  |
 | `npm run test`      | Run Playwright e2e tests             |
 
 ## Coding Conventions
