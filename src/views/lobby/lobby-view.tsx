@@ -46,6 +46,7 @@ export function LobbyView({ onJoin }: { onJoin: () => Promise<void> }) {
             toast.error(`${(err as Error)?.message ?? err}`, {
               position: "top-center",
             });
+            console.error(err);
           } finally {
             setLoading(false);
           }

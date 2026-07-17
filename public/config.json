@@ -1,0 +1,19 @@
+{
+  "drivers": {
+    "mqtt": {
+      "module": "https://esm.sh/mqtt@5.15.2",
+      "server": "wss://broker.emqx.io:8084/mqtt",
+      "prefix": "peerix/"
+    },
+    "nats": {
+      "module": "https://esm.sh/@nats-io/nats-core@3.4.0",
+      "servers": ["wss://demo.nats.io:8443"],
+      "prefix": "peerix."
+    },
+    "sse": {
+      "url": "http://localhost:8080/.well-known/mercure",
+      "publisherJwtKey": "eyJhbGciOiJIUzI1NiJ9.eyJtZXJjdXJlIjp7InB1Ymxpc2giOlsiKiJdLCJzdWJzY3JpYmUiOlsiKiJdfX0.bVXdlWXwfw9ySx7-iV5OpUSHo34RkjUdVzDLBcc6l_g"
+    }
+  },
+  "useDriver": null
+}

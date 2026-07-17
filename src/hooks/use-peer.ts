@@ -1,10 +1,11 @@
 import { useCallback, useRef } from "react";
-import { Peer, BroadcastChannelDriver } from "peerix";
 import { roomId } from "@/lib/room-info";
 import { useRouter } from "@/hooks/use-router";
 import { useStorage } from "@/hooks/use-storage";
 import { useRoom } from "@/hooks/use-room";
+import { createPeer } from "@/lib/peer-driver";
 import type { Message } from "@/lib/types";
+import type { Peer } from "peerix";
 
 export function usePeer() {
   const { navigate } = useRouter();
@@ -18,11 +19,14 @@ export function usePeer() {
   micRef.current = mic;
 
   const join = useCallback(async (initialStream?: MediaStream | null) => {
-    const driver = new BroadcastChannelDriver();
-    const peer = new Peer({ driver });
+    const peer = await createPeer();
     peerRef.current = peer;
 
     const name = username || "Guest";
+
+    peer.on("error", (e) => {
+      console.error("Peer error:", e.error);
+    });
 
     peer.on("local:share", (e) => {
       const { stream, label } = e;
