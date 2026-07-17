@@ -23,8 +23,12 @@ export function VideoGrid({
   const containerRef = useRef<HTMLDivElement>(null);
   const tileRefs = useRef(new Map<string, HTMLDivElement>());
   const prevRectsRef = useRef(new Map<string, DOMRect>());
-  const [cols, setCols] = useState(1);
-  const [rows, setRows] = useState(1);
+  const [layout, setLayout] = useState({
+    cols: 1,
+    rows: 1,
+    tileW: 0,
+    tileH: 0,
+  });
 
   useLayoutEffect(() => {
     const reduceMotion = window.matchMedia(
@@ -65,16 +69,14 @@ export function VideoGrid({
     }
 
     prevRectsRef.current = nextRects;
-  }, [cols, rows]);
+  }, [layout.cols, layout.rows]);
 
   useEffect(() => {
     const node = containerRef.current;
     if (!node) return;
 
     const update = () => {
-      const [c, r] = calcGridSize(node);
-      setCols(c);
-      setRows(r);
+      setLayout(calcGridSize(node));
     };
 
     update();
@@ -87,13 +89,13 @@ export function VideoGrid({
     <div
       ref={containerRef}
       className={cn(
-        "grid h-full w-full content-center items-stretch justify-center justify-items-stretch gap-2",
+        "grid h-full w-full overflow-hidden content-center items-center justify-center justify-items-center gap-2",
         asideOpen && "hidden md:grid",
         className,
       )}
       style={{
-        gridTemplateColumns: `repeat(${cols}, 1fr)`,
-        gridTemplateRows: `repeat(${rows}, 1fr)`,
+        gridTemplateColumns: `repeat(${layout.cols}, ${layout.tileW}px)`,
+        gridTemplateRows: `repeat(${layout.rows}, ${layout.tileH}px)`,
       }}
     >
       {participants.length === 0 ? (
@@ -106,57 +108,66 @@ export function VideoGrid({
           </EmptyHeader>
         </Empty>
       ) : (
-        participants.map((tile) => (
-          <VideoTile
-            key={`${tile.peer}-${tile.label}`}
-            peer={tile.peer}
-            label={tile.label}
-            name={tile.name}
-            audio={tile.audio}
-            video={tile.video}
-            mirror={tile.mirror}
-            muted={tile.muted}
-            speaking={tile.speaking}
-            stream={tile.stream}
-            ref={(el) => {
-              const id = `${tile.peer}-${tile.label}`;
-              if (el) tileRefs.current.set(id, el);
-              else tileRefs.current.delete(id);
-            }}
-          />
-        ))
+        participants.map((tile) => {
+          const id = `${tile.peer}-${tile.label}`;
+          return (
+            <VideoTile
+              key={id}
+              peer={tile.peer}
+              label={tile.label}
+              name={tile.name}
+              audio={tile.audio}
+              video={tile.video}
+              mirror={tile.mirror}
+              muted={tile.muted}
+              speaking={tile.speaking}
+              stream={tile.stream}
+              ref={(el) => {
+                if (el) tileRefs.current.set(id, el);
+                else tileRefs.current.delete(id);
+              }}
+            />
+          );
+        })
       )}
     </div>
   );
 }
 
-function calcGridSize(grid: HTMLDivElement): [number, number] {
+function calcGridSize(grid: HTMLDivElement) {
   const n = grid.childElementCount;
-  if (n === 0) return [0, 0];
+  if (n === 0) return { cols: 0, rows: 0, tileW: 0, tileH: 0 };
 
   const ar = 16 / 9;
+  const gap = 8; // gap-2
   const cw = grid.clientWidth || window.innerWidth;
   const ch = grid.clientHeight || window.innerHeight;
 
-  let best = [1, 1] as [number, number];
+  let bestCols = 1;
+  let bestRows = 1;
+  let bestTileW = 0;
+  let bestTileH = 0;
   let bestScore = -Infinity;
 
   for (let cols = 1; cols <= n; cols++) {
     const rows = Math.ceil(n / cols);
-    const cellW = cw / cols;
-    const cellH = ch / rows;
+    const cellW = (cw - (cols - 1) * gap) / cols;
+    const cellH = (ch - (rows - 1) * gap) / rows;
     const tileW = Math.min(cellW, cellH * ar);
     const tileH = tileW / ar;
     const score = tileW * tileH * n - (cols * rows - n) * tileW * tileH * 0.02;
 
     if (
       score - bestScore > 1e-6 ||
-      (Math.abs(score - bestScore) < 1e-6 && cols * rows < best[0] * best[1])
+      (Math.abs(score - bestScore) < 1e-6 && cols * rows < bestCols * bestRows)
     ) {
-      best = [cols, rows];
+      bestCols = cols;
+      bestRows = rows;
+      bestTileW = tileW;
+      bestTileH = tileH;
       bestScore = score;
     }
   }
 
-  return best;
+  return { cols: bestCols, rows: bestRows, tileW: bestTileW, tileH: bestTileH };
 }
