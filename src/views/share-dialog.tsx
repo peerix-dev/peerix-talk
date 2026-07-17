@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import QRCode from "qrcode";
+import { renderSVG } from "uqr";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Copy01Icon, CopyCheckIcon } from "@hugeicons/core-free-icons";
 import { inviteLink } from "@/lib/room-info";
@@ -30,15 +30,30 @@ export function ShareDialog({
   useEffect(() => {
     if (!open || !inviteLink) return;
 
-    async function generate() {
+    let currentUrl = null as string | null;
+
+    function cleanup() {
+      if (currentUrl) {
+        URL.revokeObjectURL(currentUrl);
+        currentUrl = null;
+      }
+    }
+
+    function generate() {
       try {
-        setQrSrc(await QRCode.toDataURL(inviteLink, { width: 256, margin: 1 }));
+        cleanup();
+        const svg = renderSVG(inviteLink, { pixelSize: 8, border: 2 });
+        const blob = new Blob([svg], { type: "image/svg+xml" });
+        const url = URL.createObjectURL(blob);
+        currentUrl = url;
+        setQrSrc(url);
       } catch (err) {
         console.error(err);
       }
     }
 
     generate();
+    return cleanup;
   }, [open]);
 
   async function copy() {
