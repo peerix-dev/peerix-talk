@@ -1,23 +1,23 @@
 # Peerix Talk — Agent Guide
 
-Peer-to-peer WebRTC web video conferencing app (React SPA) using [Peerix](https://github.com/peerix-dev/peerix) for signaling.
+Peer-to-peer WebRTC web video conferencing app (React SPA) using [Peerix](https://github.com/meefik/peerix) for signaling.
 
 ## Tech Stack
 
-| Category      | Tools                                                                 |
-| ------------- | --------------------------------------------------------------------- |
-| Language      | TypeScript 6 (strict)                                                 |
-| Framework     | React 19 (`react-jsx`)                                                |
-| Build         | Vite 8 + `@vitejs/plugin-react`                                       |
-| CSS           | Tailwind CSS v4 (`@tailwindcss/vite`), tw-animate-css                 |
-| UI            | shadcn/ui (`radix-mira` preset), Radix UI, CVA                        |
-| Icons / Font  | `@hugeicons/react`, Inter Variable (`@fontsource-variable/inter`)     |
-| Notifications | sonner                                                                |
-| Utils         | clsx + tailwind-merge (`cn()` in `@/lib/utils`)                       |
-| i18n          | i18next + react-i18next (browser detection, HTTP backend, eager init) |
-| Avatars / QR  | jdenticon, qrcode                                                     |
-| WebRTC        | Peerix (`peerix`)                                                     |
-| Routing       | Custom hash-based router (`use-router`)                               |
+| Category      | Tools                                                             |
+| ------------- | ----------------------------------------------------------------- |
+| Language      | TypeScript 6 (strict)                                             |
+| Framework     | React 19 (`react-jsx`)                                            |
+| Build         | Vite 8 + `@vitejs/plugin-react`                                   |
+| CSS           | Tailwind CSS v4 (`@tailwindcss/vite`), tw-animate-css             |
+| UI            | shadcn/ui (`radix-mira` preset), Radix UI, CVA                    |
+| Icons / Font  | `@hugeicons/react`, Inter Variable (`@fontsource-variable/inter`) |
+| Notifications | sonner + next-themes                                              |
+| Utils         | clsx + tailwind-merge (`cn()` in `@/lib/utils`)                   |
+| i18n          | i18next + react-i18next (browser detection, HTTP backend)         |
+| Avatars / QR  | jdenticon, qrcode                                                 |
+| WebRTC        | Peerix (`peerix`)                                                 |
+| Routing       | Custom in-memory router (`use-router`)                            |
 
 ## Architecture
 
@@ -51,7 +51,7 @@ index.html          # HTML template
 | `npm run dev`       | Dev server (`http://localhost:5173`) |
 | `npm run build`     | Type-check then production build     |
 | `npm run preview`   | Preview production build             |
-| `npm run typecheck` | `tsc -b --noEmit`                    |
+| `npm run typecheck` | Run type-check                       |
 | `npm run test`      | Run Playwright e2e tests             |
 
 ## Coding Conventions
@@ -92,43 +92,26 @@ Lands in `src/components/ui/`. See `components.json`.
 
 ## UI Verification and Testing
 
-Use browser tools to verify UI in the running app.
+Use Playwright MCP tools to verify UI in the running app.
 
 ### Workflow
 
 1. Start dev server if needed: `npm run dev`
-2. Navigate: `navigate_page({type: "url", url: "http://localhost:5173"})`
-3. Inspect: `take_snapshot` (preferred over screenshots)
-4. Interact: `click`, `fill`, `fill_form`, `type_text`, etc.
-5. Verify: another `take_snapshot` or `take_screenshot`
-6. Check errors: `list_console_messages({types: ["error"]})`
-7. Done: `close_page`
-
-### Reference
-
-| Task              | Tool(s)                                               |
-| ----------------- | ----------------------------------------------------- |
-| Inspect structure | `take_snapshot`                                       |
-| Click             | `click`                                               |
-| Type / fill forms | `fill`, `type_text`, `fill_form`                      |
-| Search text       | `evaluate_script` (DOM query)                         |
-| Run JS in page    | `evaluate_script`                                     |
-| Console errors    | `list_console_messages`                               |
-| Network requests  | `list_network_requests`, `get_network_request`        |
-| Handle dialogs    | `handle_dialog`                                       |
-| Wait for content  | `wait_for`                                            |
-| Screenshot        | `take_screenshot`                                     |
-| Navigate          | `navigate_page`                                       |
-| Multi-peer tabs   | `new_page`, `list_pages`, `select_page`, `close_page` |
+2. Navigate: `browser_navigate({url: "http://localhost:5173"})`
+3. Inspect: `browser_snapshot` (preferred over screenshots)
+4. Interact: `browser_click`, `browser_fill_form`, `browser_type`, etc.
+5. Verify: another `browser_snapshot` or `browser_take_screenshot`
+6. Check errors: `browser_console_messages({level: "error"})`
+7. Done: `browser_close`
 
 ### Tips
 
 - Check whether the dev server is already running, or start it before using browser tools.
-- **Prefer `take_snapshot`** — accessibility tree you can act on directly.
-- **Use `evaluate_script`** to query the DOM and inspect React state/hooks when debugging.
+- **Prefer `browser_snapshot`** — accessibility tree you can act on directly.
+- **Use `browser_evaluate`** to query the DOM and inspect React state/hooks when debugging.
 - **Always check console errors** after changes.
 - **Set `timeout_ms`** on long-running terminal commands.
-- **Multi-peer testing** uses `new_page` to open additional tabs, then `select_page` to switch between them.
+- **Multi-peer testing** uses `browser_tabs({action: "new"})` to open additional tabs, then `browser_tabs({action: "select", index: N})` to switch between them.
 
 ## Dev Checklist
 
@@ -161,4 +144,4 @@ Run after significant changes to verify core functionality. Use browser tools to
 - **Cross-peer chat** — send message from Peer 1, verify it appears in Peer 2's chat with correct author and timestamp
 - **Theme toggle** — pressing `d` cycles dark ↔ light
 - **i18n** — all strings render correctly via `t()` in current language
-- **Console errors** — `list_console_messages({types: ["error"]})` returns 0 errors
+- **Console errors** — `browser_console_messages({level: "error"})` returns 0 errors
