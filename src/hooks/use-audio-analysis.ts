@@ -1,37 +1,25 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 const BAR_COUNT = 21;
 
 export function useAudioLevels(stream: MediaStream | null) {
-  const streamRef = useRef<MediaStream | null>(stream);
   const [levels, setLevels] = useState(() => Array(BAR_COUNT).fill(0));
-  const [tick, setTick] = useState(0);
 
-  // Detect stream changes
   useEffect(() => {
-    if (stream !== streamRef.current) {
-      streamRef.current = stream;
-      setTick((t) => t + 1);
-    }
-  }, [stream]);
-
-  // Setup audio analysis when stream changes
-  useEffect(() => {
-    const currentStream = streamRef.current;
-
-    if (!currentStream) {
+    if (!stream) {
       setLevels(Array(BAR_COUNT).fill(0));
       return;
     }
 
-    if (!currentStream.getAudioTracks().length) {
+    const audioTracks = stream.getAudioTracks();
+    if (!audioTracks.length) {
       setLevels(Array(BAR_COUNT).fill(0));
       return;
     }
 
     try {
       const audioContext = new AudioContext();
-      const source = audioContext.createMediaStreamSource(currentStream);
+      const source = audioContext.createMediaStreamSource(stream);
       const analyser = audioContext.createAnalyser();
       analyser.fftSize = 64;
       analyser.smoothingTimeConstant = 0.8;
@@ -68,7 +56,7 @@ export function useAudioLevels(stream: MediaStream | null) {
     } catch {
       setLevels(Array(BAR_COUNT).fill(0));
     }
-  }, [tick]);
+  }, [stream]);
 
   return levels;
 }

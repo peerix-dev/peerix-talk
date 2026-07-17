@@ -17,6 +17,13 @@ interface RoomState {
 
 const RoomContext = createContext<RoomState | null>(null);
 
+function createToggle(setter: React.Dispatch<React.SetStateAction<boolean>>) {
+  return useCallback(
+    (next?: boolean) => setter(next !== undefined ? next : (prev) => !prev),
+    [setter],
+  );
+}
+
 export function RoomProvider({ children }: { children: React.ReactNode }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -24,18 +31,9 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   const [mic, setMic] = useState(false);
   const [scr, setScr] = useState(false);
 
-  const toggleCam = useCallback(
-    (next?: boolean) => setCam(next !== undefined ? next : (prev) => !prev),
-    [],
-  );
-  const toggleMic = useCallback(
-    (next?: boolean) => setMic(next !== undefined ? next : (prev) => !prev),
-    [],
-  );
-  const toggleScr = useCallback(
-    (next?: boolean) => setScr(next !== undefined ? next : (prev) => !prev),
-    [],
-  );
+  const toggleCam = createToggle(setCam);
+  const toggleMic = createToggle(setMic);
+  const toggleScr = createToggle(setScr);
 
   return (
     <RoomContext.Provider

@@ -56,10 +56,7 @@ export function useStorage(key: string) {
   }
 
   const value = ctx.get(key);
-  const setValue = useCallback(
-    (next: string) => ctx.set(key, next),
-    [ctx, key],
-  );
+  const setValue = (next: string) => ctx.set(key, next);
 
   return { value, setValue };
 }

@@ -12,15 +12,12 @@ async function enumerate(kind: MediaKind): Promise<MediaDevice[]> {
     const devices = await navigator.mediaDevices.enumerateDevices();
     return devices
       .filter((d) => d.kind === `${kind}input`)
-      .map(
-        (d) =>
-          ({
-            deviceId: d.deviceId,
-            label:
-              d.label ||
-              `${kind === "audio" ? "Microphone" : "Camera"} ${d.deviceId.slice(0, 5)}`,
-          }) as MediaDevice,
-      );
+      .map((d) => ({
+        deviceId: d.deviceId,
+        label:
+          d.label ||
+          `${kind === "audio" ? "Microphone" : "Camera"} ${d.deviceId.slice(0, 5)}`,
+      }));
   } catch {
     return [];
   }

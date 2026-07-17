@@ -53,14 +53,15 @@ export function MediaButton({ kind, enabled, onToggle }: MediaButtonProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Keep video element in sync with stream changes
-  useEffect(() => {
-    if (kind !== "video") return;
-    if (streamState && videoRef.current) {
+  const setStream = (stream: MediaStream) => {
+    streamRef.current = stream;
+    setStreamState(stream);
+    if (kind === "video" && videoRef.current) {
       setVideoReady(false);
-      videoRef.current.srcObject = streamState;
+      videoRef.current.srcObject = stream;
       videoRef.current.play().catch(() => {});
     }
-  }, [streamState]);
+  };
 
   const stopMediaProcessing = useCallback(() => {
     if (videoRef.current?.srcObject) {
@@ -102,13 +103,7 @@ export function MediaButton({ kind, enabled, onToggle }: MediaButtonProps) {
           const stream = await navigator.mediaDevices.getUserMedia({
             [kind]: effectiveDeviceId ? { deviceId: effectiveDeviceId } : true,
           });
-          streamRef.current = stream;
-          setStreamState(stream);
-          if (kind === "video" && videoRef.current) {
-            setVideoReady(false);
-            videoRef.current.srcObject = stream;
-            videoRef.current.play().catch(() => {});
-          }
+          setStream(stream);
         } catch {
           // permission denied or cancelled
         }
@@ -127,13 +122,7 @@ export function MediaButton({ kind, enabled, onToggle }: MediaButtonProps) {
       const stream = await navigator.mediaDevices.getUserMedia({
         [kind]: deviceId ? { deviceId } : true,
       });
-      streamRef.current = stream;
-      setStreamState(stream);
-      if (kind === "video" && videoRef.current) {
-        setVideoReady(false);
-        videoRef.current.srcObject = stream;
-        videoRef.current.play().catch(() => {});
-      }
+      setStream(stream);
     } catch {
       // permission denied
     }
@@ -150,15 +139,7 @@ export function MediaButton({ kind, enabled, onToggle }: MediaButtonProps) {
           size="lg"
           variant={enabled ? "outline" : "destructive"}
           onClick={() => onToggle()}
-          aria-label={t(
-            kind === "audio"
-              ? enabled
-                ? "mediaButton.audioToggleOn"
-                : "mediaButton.audioToggleOff"
-              : enabled
-                ? "mediaButton.videoToggleOn"
-                : "mediaButton.videoToggleOff",
-          )}
+          aria-label={t(`mediaButton.${kind}Toggle${enabled ? "On" : "Off"}`)}
         >
           <HugeiconsIcon icon={icon} />
         </Button>
@@ -166,11 +147,7 @@ export function MediaButton({ kind, enabled, onToggle }: MediaButtonProps) {
           <Button
             size="icon-lg"
             variant={enabled ? "outline" : "destructive"}
-            aria-label={t(
-              kind === "audio"
-                ? "mediaButton.audioDevices"
-                : "mediaButton.videoDevices",
-            )}
+            aria-label={t(`mediaButton.${kind}Devices`)}
           >
             <HugeiconsIcon icon={ChevronDown} />
           </Button>

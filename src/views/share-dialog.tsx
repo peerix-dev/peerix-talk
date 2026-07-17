@@ -39,7 +39,7 @@ export function ShareDialog({
     }
 
     generate();
-  }, [open, inviteLink]);
+  }, [open]);
 
   async function copy() {
     try {

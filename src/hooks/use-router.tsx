@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 export type Route = "lobby" | "room";
 
@@ -12,12 +12,8 @@ const RouterContext = createContext<RouterState | undefined>(undefined);
 export function RouterProvider({ children }: { children: React.ReactNode }) {
   const [route, setRoute] = useState<Route>("lobby");
 
-  const navigate = useCallback((next: Route) => {
-    setRoute(next);
-  }, []);
-
   return (
-    <RouterContext.Provider value={{ route, navigate }}>
+    <RouterContext.Provider value={{ route, navigate: setRoute }}>
       {children}
     </RouterContext.Provider>
   );
