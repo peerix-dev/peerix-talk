@@ -13,10 +13,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "typecheck": "tsc -b --noEmit",
     "preview": "vite preview",
-    "test": "playwright test"
+    "typecheck": "tsc -b --noEmit",
+    "test": "playwright test",
+    "build": "tsc -b && vite build",
+    "build:assets": "npx @vite-pwa/assets-generator --preset minimal-2023 public/logo.svg"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.8",
