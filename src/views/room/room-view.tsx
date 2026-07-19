@@ -10,7 +10,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { roomId } from "@/lib/room-info";
 import { formatDuration } from "@/lib/format";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { canShareScreen } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -33,7 +33,6 @@ export function RoomView({ onLeave, onSend }: { onLeave: () => void; onSend: (te
   const [chatOpen, setChatOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [elapsed, setElapsed] = useState(0);
-  const isMobile = useIsMobile();
 
   useEffect(() => {
     const id = setInterval(() => setElapsed((d) => d + 1), 1000);
@@ -65,7 +64,7 @@ export function RoomView({ onLeave, onSend }: { onLeave: () => void; onSend: (te
           <MediaButton kind="video" enabled={cam} onToggle={toggleCam} />
           {/* Desktop: show buttons inline */}
           <div className="hidden gap-2 sm:flex">
-            {!isMobile && (
+            {canShareScreen() && (
               <Button
                 size="lg"
                 variant={scr ? "default" : "outline"}
@@ -120,7 +119,7 @@ export function RoomView({ onLeave, onSend }: { onLeave: () => void; onSend: (te
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuGroup>
-                {!isMobile && (
+                {canShareScreen() && (
                   <DropdownMenuItem onClick={() => toggleScr()}>
                     <HugeiconsIcon icon={ComputerScreenShareIcon} />
                     {t("room.screenShare")}
