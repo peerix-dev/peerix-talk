@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useRouter } from "@/hooks/use-router";
 import { useStorage } from "@/hooks/use-storage";
 import { useRoom } from "@/hooks/use-room";
@@ -9,6 +10,7 @@ import { LobbyView } from "@/views/lobby/lobby-view";
 import { RoomView } from "@/views/room/room-view";
 
 export function RoomController() {
+  const { t } = useTranslation();
   const { route } = useRouter();
   const { setMessages } = useRoom();
   const { value: username } = useStorage("username");
@@ -24,10 +26,10 @@ export function RoomController() {
     (text: string) => {
       setMessages((prev) => [
         ...prev,
-        { id: crypto.randomUUID(), author: username || "Guest", text, time: Date.now() },
+        { id: crypto.randomUUID(), author: username || t("common.defaultUserName"), text, time: Date.now() },
       ]);
     },
-    [username, setMessages],
+    [username, t, setMessages],
   );
 
   return (

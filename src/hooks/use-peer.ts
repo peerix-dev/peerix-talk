@@ -1,4 +1,5 @@
 import { useCallback, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { roomId } from "@/lib/room-info";
 import { useRouter } from "@/hooks/use-router";
 import { useStorage } from "@/hooks/use-storage";
@@ -8,21 +9,24 @@ import type { Message } from "@/lib/types";
 import type { Peer } from "peerix";
 
 export function usePeer() {
+  const { t } = useTranslation();
   const { navigate } = useRouter();
   const { value: username } = useStorage("username");
   const { cam, mic, setParticipants, setMessages, toggleCam, toggleMic, toggleScr } = useRoom();
   const peerRef = useRef<Peer | null>(null);
   const camRef = useRef(cam);
   const micRef = useRef(mic);
+  const nameRef = useRef(username);
 
   camRef.current = cam;
   micRef.current = mic;
+  nameRef.current = username;
 
   const join = useCallback(async (initialStream?: MediaStream | null) => {
     const peer = await createPeer();
     peerRef.current = peer;
 
-    const name = username || "Guest";
+    const name = nameRef.current || t("common.defaultUserName");
 
     peer.on("error", (e) => {
       console.error("Peer error:", e.error);
@@ -85,7 +89,7 @@ export function usePeer() {
         {
           peer: remote.id,
           label: "camera",
-          name: `${remote.metadata?.name ?? "Guest"}`,
+          name: `${remote.metadata?.name ?? t("common.defaultUserName")}`,
         },
       ]);
     });
@@ -98,13 +102,27 @@ export function usePeer() {
     peer.on("track", (e) => {
       const { remote, stream, label } = e;
       setParticipants((prev) => {
+        if (!stream.active) {
+          return label === "camera"
+            ? prev.map((p) =>
+                p.label === label && p.peer === remote.id
+                  ? {
+                      peer: remote.id,
+                      label,
+                      name: `${remote.metadata?.name ?? t("common.defaultUserName")}`,
+                    }
+                  : p,
+              )
+            : prev.filter((p) => !(p.label === label && p.peer === remote.id));
+        }
+
         const existing = prev.find(
           (p) => p.label === label && p.peer === remote.id,
         );
         const entry = {
           peer: remote.id,
           label,
-          name,
+          name: `${remote.metadata?.name ?? t("common.defaultUserName")}`,
           stream,
           audio: stream.getAudioTracks().length > 0,
           video: stream.getVideoTracks().length > 0,
@@ -137,7 +155,7 @@ export function usePeer() {
     }
 
     navigate("room");
-  }, [navigate, username, setParticipants, setMessages, toggleCam, toggleMic, toggleScr]);
+  }, [navigate, t, username, setParticipants, setMessages, toggleCam, toggleMic, toggleScr]);
 
   const leave = useCallback(async () => {
     peerRef.current?.unshare({ label: "camera" });
